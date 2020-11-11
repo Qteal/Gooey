@@ -189,6 +189,10 @@ class FilterableDropdown(Dropdown):
         self.listbox.SetSize((-1, -1))
 
 
+def _simpleFilter(choices, prompt):
+    prompt = prompt.lower()
+    return [choice for choice in choices if choice.lower().startswith(prompt)]
+
 
 class FilterableDropdownModel(object):
     """
@@ -208,6 +212,7 @@ class FilterableDropdownModel(object):
         self.dropEvent = False
         self.suggestionsVisible = False
         self.noMatch = options.get('no_matches', _('dropdown.no_matches'))
+        self.filter = options.get('filter', _simpleFilter)
         self.choices = choices
         self.suggestions = []
         self.selectedSuggestion = -1
@@ -264,8 +269,7 @@ class FilterableDropdownModel(object):
             self.selectedSuggestion = -1
 
     def generateSuggestions(self, prompt):
-        prompt = prompt.lower()
-        suggestions = [choice for choice in self.choices if choice.lower().startswith(prompt)]
+        suggestions = self.filter(self.choices, prompt)
         final_suggestions = suggestions if suggestions else [self.noMatch]
         self.suggestions = final_suggestions
 
